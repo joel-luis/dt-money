@@ -1,34 +1,13 @@
-import { useEffect, useState } from 'react'
-
 import { Header } from 'components/Header'
 import { Summary } from 'components/Summary'
 import { SearchForm } from './components/SearchForm'
+import { useTransactions } from 'contexts/TransactionContext'
+import { dateFormatter, priceFormatter } from 'utils/formater'
 
 import * as S from './styles'
 
-interface Transaction {
-  id: number
-  description: string
-  type: 'income' | 'outcome'
-  price: number
-  category: string
-  createdAt: string
-}
-
 export function Transactions() {
-  const [transactions, setTransactions] = useState<Transaction[]>([])
-
-  async function loadTransactions() {
-    const response = await fetch('http://localhost:3333/transactions')
-    const data = await response.json()
-
-    setTransactions(data)
-  }
-
-  useEffect(() => {
-    loadTransactions()
-  }, [])
-
+  const { transactions } = useTransactions()
   return (
     <>
       <Header />
@@ -42,11 +21,12 @@ export function Transactions() {
                 <td width="40%">{transaction.description}</td>
                 <td>
                   <S.PriceHighlight variant={transaction.type}>
-                    {transaction.price}
+                    {transaction.type === 'outcome' && '- '}
+                    {priceFormatter.format(transaction.price)}
                   </S.PriceHighlight>
                 </td>
                 <td>{transaction.category}</td>
-                <td>{transaction.createdAt}</td>
+                <td>{dateFormatter.format(new Date(transaction.createdAt))}</td>
               </tr>
             ))}
           </tbody>
